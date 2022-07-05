@@ -5685,7 +5685,7 @@ main( int argv, char ** argc ) {
     self.do_runf(test_file('utf32.cpp'), 'OK.', args=['-fshort-wchar'])
 
   def test_utf16(self):
-    self.set_setting('EXPORTED_RUNTIME_METHODS', ['writeAsciiToMemory'])
+    self.set_setting('EXPORTED_RUNTIME_METHODS', ['UTF16ToString', 'stringToUTF16', 'writeAsciiToMemory'])
     self.do_runf(test_file('core/test_utf16.cpp'), 'OK.')
 
   def test_utf8(self):
@@ -7552,7 +7552,7 @@ void* operator new(size_t size) {
 
     # Export things on "TheModule". This matches the typical use pattern of the bound library
     # being used as Box2D.* or Ammo.*, and we cannot rely on "Module" being always present (closure may remove it).
-    self.emcc_args += ['-sEXPORTED_FUNCTIONS=_malloc,_free', '--post-js=glue.js', '--extern-post-js=extern-post.js']
+    self.emcc_args += ['-sEXPORTED_RUNTIME_METHODS=intArrayFromString', '-sEXPORTED_FUNCTIONS=_malloc,_free', '--post-js=glue.js', '--extern-post-js=extern-post.js']
     if mode == 'ALL':
       self.emcc_args += ['-sASSERTIONS']
     if allow_memory_growth:
@@ -7796,6 +7796,7 @@ void* operator new(size_t size) {
       '--closure=1',
       '-g1',
       '-sMODULARIZE',
+      '-sEXPORTED_RUNTIME_METHODS=intArrayToString'
     ]
     self.do_core_test('modularize_closure_pre.c')
 
@@ -8378,6 +8379,7 @@ NODEFS is no longer included by default; build with -lnodefs.js
   def test_stack_overflow_check(self):
     self.set_setting('TOTAL_STACK', 1048576)
     self.set_setting('STACK_OVERFLOW_CHECK', 2)
+    self.set_setting('EXPORTED_RUNTIME_METHODS', ['allocateUTF8OnStack'])
     self.do_runf(test_file('stack_overflow.cpp'), 'stack overflow', assert_returncode=NON_ZERO)
 
     self.emcc_args += ['-DONE_BIG_STRING']
@@ -8793,6 +8795,7 @@ NODEFS is no longer included by default; build with -lnodefs.js
     self.emcc_args.append('-fsanitize=address')
     self.set_setting('ALLOW_MEMORY_GROWTH')
     self.set_setting('INITIAL_MEMORY', '300mb')
+    self.set_setting('EXPORTED_RUNTIME_METHODS', 'allocateUTF8OnStack')
     self.do_runf(test_file('core/test_asan_js_stack_op.c'),
                  expected_output='Hello, World!')
 
