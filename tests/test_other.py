@@ -9860,6 +9860,10 @@ int main(void) {
   })
   @no_windows('ptys and select are not available on windows')
   def test_pty_no_color(self, flag):
+    # Ensure that the sysroot is already constructed so that emcc doesn't
+    # output any log information in color.
+    self.emcc(test_file('hello_world.c'), ['-c'])
+
     create_file('src.c', 'int main() {')
 
     returncode, output = self.run_on_pty([EMCC, flag, 'src.c'])
